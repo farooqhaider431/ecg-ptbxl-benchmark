@@ -218,17 +218,18 @@ def run_evaluation(config=None):
         }
 
     # Dynamic path detection for Kaggle vs Drive vs local
-    if not os.path.exists(config['ptbxl_path']):
-        possible_paths = [
-            '/kaggle/input/ptb-xl-dataset/ptb-xl-1.0.3',
-            '/kaggle/input/ptb-xl-dataset',
-            '/kaggle/input/physionet-ptbxl',
-            '/content/drive/MyDrive/MediSense/datasets/module3_ecg/ptbxl/physionet.org/files/ptb-xl/1.0.3',
+    if not os.path.exists(os.path.join(config['ptbxl_path'], 'ptbxl_database.csv')):
+        search_roots = [
+            config['ptbxl_path'],
+            '/kaggle/input',
+            '/content/drive/MyDrive',
         ]
-        for p in possible_paths:
-            if os.path.exists(p):
-                config['ptbxl_path'] = p
-                break
+        for root in search_roots:
+            if os.path.exists(root):
+                matches = glob.glob(os.path.join(root, '**', 'ptbxl_database.csv'), recursive=True)
+                if matches:
+                    config['ptbxl_path'] = os.path.dirname(matches[0])
+                    break
 
     from .model import ECGTransformer
     from .dataset import create_dataloaders

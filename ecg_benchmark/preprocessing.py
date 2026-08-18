@@ -8,7 +8,14 @@ import ast
 import numpy as np
 import pandas as pd
 from scipy.signal import butter, filtfilt, resample
-import wfdb
+try:
+    import wfdb
+except ImportError:
+    import subprocess
+    import sys
+    print("Installing wfdb library...")
+    subprocess.run([sys.executable, '-m', 'pip', 'install', 'wfdb', '--quiet'], check=True)
+    import wfdb
 
 SUPERCLASS_NAMES = ['NORM', 'MI', 'STTC', 'CD', 'HYP']
 NUM_SUPERCLASSES = 5
