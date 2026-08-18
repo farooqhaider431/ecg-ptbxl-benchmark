@@ -57,21 +57,34 @@ class ECGDataset(Dataset):
             })
 
     def _find_file(self, filename):
-        """Finds CSV file recursively across ptbxl_path and /kaggle/input if needed."""
+        """Finds CSV file using os.walk across ptbxl_path, /kaggle/input, and parent directories."""
+        # 1. Direct check
         direct = os.path.join(self.ptbxl_path, filename)
         if os.path.exists(direct):
             return direct
 
-        matches = glob.glob(os.path.join(self.ptbxl_path, '**', filename), recursive=True)
-        if matches:
-            return matches[0]
+        # 2. Walk ptbxl_path
+        if os.path.exists(self.ptbxl_path):
+            for dirpath, _, filenames in os.walk(self.ptbxl_path):
+                for f in filenames:
+                    if f.lower() == filename.lower():
+                        return os.path.join(dirpath, f)
 
+        # 3. Walk /kaggle/input
         if os.path.exists('/kaggle/input'):
-            matches = glob.glob(os.path.join('/kaggle/input', '**', filename), recursive=True)
-            if matches:
-                return matches[0]
+            for dirpath, _, filenames in os.walk('/kaggle/input'):
+                for f in filenames:
+                    if f.lower() == filename.lower():
+                        return os.path.join(dirpath, f)
 
-        raise FileNotFoundError(f"Could not locate {filename} under {self.ptbxl_path} or /kaggle/input")
+        # 4. Walk /content (Colab)
+        if os.path.exists('/content'):
+            for dirpath, _, filenames in os.walk('/content'):
+                for f in filenames:
+                    if f.lower() == filename.lower():
+                        return os.path.join(dirpath, f)
+
+        raise FileNotFoundError(f"Could not locate {filename} anywhere under {self.ptbxl_path} or /kaggle/input")
 
     def __len__(self):
         return len(self.records)
