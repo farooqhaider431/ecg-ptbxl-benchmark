@@ -203,20 +203,16 @@ def train(config=None):
     # Dynamic path detection for Kaggle vs Drive vs local
     if not os.path.exists(os.path.join(config['ptbxl_path'], 'ptbxl_database.csv')):
         search_roots = [
-            config['ptbxl_path'],
             '/kaggle/input',
+            config['ptbxl_path'],
             '/content/drive/MyDrive',
         ]
-        found = False
         for root in search_roots:
             if os.path.exists(root):
                 matches = glob.glob(os.path.join(root, '**', 'ptbxl_database.csv'), recursive=True)
                 if matches:
                     config['ptbxl_path'] = os.path.dirname(matches[0])
-                    found = True
                     break
-        if not found:
-            print(f"Warning: Could not locate ptbxl_database.csv automatically in {search_roots}")
 
     from .model import ECGTransformer
     from .dataset import create_dataloaders

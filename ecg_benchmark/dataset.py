@@ -57,7 +57,7 @@ class ECGDataset(Dataset):
             })
 
     def _find_file(self, filename):
-        """Finds CSV file recursively if top-level path differs slightly on Kaggle."""
+        """Finds CSV file recursively across ptbxl_path and /kaggle/input if needed."""
         direct = os.path.join(self.ptbxl_path, filename)
         if os.path.exists(direct):
             return direct
@@ -66,7 +66,12 @@ class ECGDataset(Dataset):
         if matches:
             return matches[0]
 
-        raise FileNotFoundError(f"Could not locate {filename} under {self.ptbxl_path}")
+        if os.path.exists('/kaggle/input'):
+            matches = glob.glob(os.path.join('/kaggle/input', '**', filename), recursive=True)
+            if matches:
+                return matches[0]
+
+        raise FileNotFoundError(f"Could not locate {filename} under {self.ptbxl_path} or /kaggle/input")
 
     def __len__(self):
         return len(self.records)

@@ -220,8 +220,8 @@ def run_evaluation(config=None):
     # Dynamic path detection for Kaggle vs Drive vs local
     if not os.path.exists(os.path.join(config['ptbxl_path'], 'ptbxl_database.csv')):
         search_roots = [
-            config['ptbxl_path'],
             '/kaggle/input',
+            config['ptbxl_path'],
             '/content/drive/MyDrive',
         ]
         for root in search_roots:
